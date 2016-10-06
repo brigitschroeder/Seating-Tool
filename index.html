@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Seating Tool</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/seating-tool.css">
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <h1>Seating Tool</h1>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-sm-3 col-lg-2">
+                <h3>Unassigned</h3>
+                <div class="theListWrapper">
+                    <canvas id="theList" height="1000" width="200">Your browser does not support HTML5 canvas.</canvas>
+                </div>
+            </div>
+            <div class="col-xs-8 col-sm-9 col-lg-10">
+                <h3>Room</h3>
+                <div class="theRoomWrapper">
+                    <canvas id="theRoom" height="1000" width="2000">Your browser does not support HTML5 canvas.</canvas>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.container -->
+    <div class="container">
+        <pre id="savedModel">
+{ "tables" : [
+{"key":0, "name":"Table 1", "seats": 6, "loc":"300 100"},
+{"key":1, "name":"Table 2", "seats": 8, "loc":"525 100"},
+{"key":2, "name":"Table 3", "seats": 8, "loc":"300 325"},
+{"key":3, "name":"Table 4", "seats": 8, "loc":"525 325"},
+{"key":4, "name":"Table 5", "seats": 5, "loc":"750 100"}],
+"attendees" : [
+{"key":0, "name":"Benjamin Sisko", "table":0, "seat":1},
+{"key":1, "name":"Julian Bashir", "table":2, "seat":1},
+{"key":2, "name":"Odo", "table":1, "seat":2},
+{"key":3, "name":"Worf", "table":1, "seat":3},
+{"key":4, "name":"Jake Sisko", "table":3, "seat":2},
+{"key":5, "name":"Miles O'Brien", "table":3, "seat":3},
+{"key":6, "name":"Quark"},
+{"key":7, "name":"Kira Nerys"},
+{"key":8, "name":"Dukat"},
+{"key":9, "name":"Elim Garak"},
+{"key":10, "name":"Weyoun"},
+{"key":11, "name":"Kai Winn"},
+{"key":12, "name":"Kasidy Yates"}
+]}
+        </pre>
+    </div><!-- /.container -->
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!-- Modernizr -->
+    <script src="js/modernizr-2.0.6.js"></script>
+
+    <script src = "js/Table.js"></script>
+    <script src = "js/Seat.js"></script>
+    <script src = "js/Unassigned.js"></script>
+    <script src="js/app.js"></script>
+
+    <script type="text/javascript">
+
+        window.addEventListener("load", windowLoadHandler, false);
+
+        //For debug messages
+        var Debugger = function() { };
+        Debugger.log = function(message) {
+            try {
+                console.log(message);
+            }
+            catch (exception) {
+                return;
+            }
+        }
+
+        function windowLoadHandler() {
+            canvasApp();
+        }
+
+    </script>
+</body>
+</html>
