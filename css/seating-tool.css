@@ -1,3 +1,6 @@
+.toolbar, #savedModel, #lastClicked {
+    margin: 30px auto;
+}
 .theListWrapper {
     overflow: scroll;
     height: 500px;
@@ -11,12 +14,4 @@
     width: 100%;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-pre {
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;
-    white-space: -o-pre-wrap;
-    word-wrap: break-word;
 }

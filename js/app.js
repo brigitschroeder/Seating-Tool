@@ -110,6 +110,7 @@ function canvasApp() {
         for (i=0; i < numShapes; i++) {
             if (shapes[i].hitTest(mouseX, mouseY) && !(shapes[i] instanceof Unassigned)) {
                 dragging = true;
+
                 //the following variable will be reset if this loop repeats with another successful hit:
                 dragIndex = i;
             }
@@ -120,6 +121,15 @@ function canvasApp() {
 
             //place currently dragged shape on top
             shapes.push(shapes.splice(dragIndex,1)[0]);
+
+            //store last clicked info for editing tool
+            var lastClicked =[];
+            if (shapes[numShapes-1] instanceof Table){
+                lastClicked.push({'type':'Table', 'key':shapes[numShapes-1]['key'], 'name': shapes[numShapes-1]['name'], 'seats': shapes[numShapes-1]['n']});
+            } else {
+                lastClicked.push({'type':'Person', 'key':shapes[numShapes-1]['key'], 'name': shapes[numShapes-1]['name']});
+            }
+            document.getElementById("lastClicked").textContent = JSON.stringify(lastClicked, null, '\t');
 
             //shape to drag is now last one in array
             dragHoldX = mouseX - shapes[numShapes-1].x;
@@ -213,7 +223,7 @@ function canvasApp() {
                     myData.attendees[shapes[numShapes-1].key]['seat'] = newSeat;
                 }
             }
-            document.getElementById("savedModel").textContent = JSON.stringify(myData);
+            document.getElementById("savedModel").textContent = JSON.stringify(myData, null, '\t');
             init();
         }
         drawScreen();
@@ -250,7 +260,7 @@ function canvasApp() {
             mouseY = (evt.clientY - bRect.top)*(theRoom.height/bRect.height);
         }
 
-        console.log(shapes[numShapes-1].canv);
+        //console.log(shapes[numShapes-1].canv);
         //console.log(aRect.height);
 
         posX = mouseX - dragHoldX;
@@ -286,4 +296,141 @@ function canvasApp() {
     }
 
 
+    //Disable canvas event listener while modal is shown
+    $(".modal").on('shown.bs.modal', function () {
+        window.removeEventListener("mousedown", mouseDownListener, false);
+    });
+     $(".modal").on('hidden.bs.modal', function () {
+        window.addEventListener("mousedown", mouseDownListener, false);
+     });
+
+    //Add person or table
+    $('input[type=radio][name=optionsRadios]').change(function() {
+        if (this.value == 'person') {
+            $('.numberSeatsGroup').hide();
+        }
+        else if (this.value == 'table') {
+            $('.numberSeatsGroup').show();
+        }
+    });
+    $("#modalAdd").on('shown.bs.modal', function () {
+        var addType = $('input[name=optionsRadios]:checked', '#formAdd').val();
+        if (addType == 'person') {
+            $('.numberSeatsGroup').hide();
+        }
+        else if (addType == 'table') {
+            $('.numberSeatsGroup').show();
+        }
+    });
+
+    //Edit person or table
+    $("#modalEdit").on('shown.bs.modal', function () {
+        if (document.getElementById("lastClicked").textContent.length){
+            var editTarget = JSON.parse(document.getElementById("lastClicked").textContent);
+            if (editTarget[0]['type'] == 'Person'){
+                $('.modal-edit-title').text('Edit Person: ' + editTarget[0]['name']);
+                $('#editShapeName').val(editTarget[0]['name']);
+                $('.editNumberSeatsGroup').hide();
+            } else if (editTarget[0]['type'] == 'Table'){
+                $('.modal-edit-title').text('Edit Table: ' + editTarget[0]['name']);
+                $('#editShapeName').val(editTarget[0]['name']);
+                $('#editNumberSeats').val(Number(editTarget[0]['seats']));
+                $('.editNumberSeatsGroup').show();
+            }
+        } else {
+            alert("Please select a person or table before clicking the edit button.");
+            $('#modalEdit').modal('hide');
+        }
+    });
+
+    //Delete person or table
+    $("#modalDelete").on('shown.bs.modal', function () {
+        if (document.getElementById("lastClicked").textContent.length){
+            var editTarget = JSON.parse(document.getElementById("lastClicked").textContent);
+            if (editTarget[0]['type'] == 'Person'){
+                $('.modal-delete-title').text('Delete Person: ' + editTarget[0]['name']);
+            } else if (editTarget[0]['type'] == 'Table'){
+                $('.modal-delete-title').text('Delete Table: ' + editTarget[0]['name']);
+            }
+        } else {
+            alert("Please select a person or table before clicking the delete button.");
+            $('#modalDelete').modal('hide');
+        }
+    });
+
+    $('.save-changes').click(function () {
+        var modalName = $(this).parents('.modal').attr('id');
+        //Add person or table
+        if (modalName == 'modalAdd'){
+            var addType = $('input[name=optionsRadios]:checked', '#formAdd').val();
+            var name = $('#addShapeName').val();
+            if (addType == 'person'){
+                myData.attendees.push({'key':myData.attendees.length, 'name':name});
+            } else if (addType == 'table'){
+                var numberSeats = $('#numberSeats').val();
+                myData.tables.push({'key':myData.tables.length, 'name':name, 'seats':numberSeats, 'loc':'100 100'});
+            }
+            $('#modalAdd').modal('hide');
+            document.getElementById("savedModel").textContent = JSON.stringify(myData, null, '\t');
+            init();
+        }
+        //Edit person or table
+        if (modalName == 'modalEdit'){
+            var editTarget = JSON.parse(document.getElementById("lastClicked").textContent);
+            var shapekey = editTarget[0]['key'];
+            if (editTarget[0]['type'] == 'Person'){
+                for (i=0; i < myData.attendees.length; i++){
+                    if (myData.attendees[i]['key'] == shapekey){
+                        myData.attendees[i]['name'] = $('#editShapeName').val();
+                        break;
+                    }
+                }
+            } else if (editTarget[0]['type'] == 'Table'){
+                for (i=0; i < myData.tables.length; i++){
+                    if (myData.tables[i]['key'] == shapekey){
+                        myData.tables[i]['name'] = $('#editShapeName').val();
+                        myData.tables[i]['seats'] = $('#editNumberSeats').val();
+                        break;
+                    }
+                }
+            }
+            $('#modalEdit').modal('hide');
+            document.getElementById("savedModel").textContent = JSON.stringify(myData, null, '\t');
+            init();
+        }
+        //Delete person or table
+        if (modalName == 'modalDelete'){
+            var editTarget = JSON.parse(document.getElementById("lastClicked").textContent);
+            var shapekey = editTarget[0]['key'];
+            if (editTarget[0]['type'] == 'Person'){
+                for (i=0; i < myData.attendees.length; i++){
+                    if (myData.attendees[i]['key'] == shapekey){
+                        myData.attendees.splice( $.inArray(myData.attendees[i], myData.attendees), 1 );
+                        break;
+                    }
+                }
+            } else if (editTarget[0]['type'] == 'Table'){
+                //remove table from array
+                for (i=0; i < myData.tables.length; i++){
+                    if (myData.tables[i]['key'] == shapekey){
+                        myData.tables.splice( $.inArray(myData.tables[i], myData.tables), 1 );
+                        break;
+                    }
+                }
+                //unassign people seated at this table
+                for (i=0; i < myData.attendees.length; i++){
+                    if (myData.attendees[i]['table'] == shapekey){
+                        thisKey = myData.attendees[i]['key'];
+                        thisName = myData.attendees[i]['name'];
+                        myData.attendees.splice( $.inArray(myData.attendees[i], myData.attendees), 1 );
+                        myData.attendees.push({'key':thisKey, 'name':thisName});
+                        break;
+                    }
+                }
+            }
+            $('#modalDelete').modal('hide');
+            document.getElementById("savedModel").textContent = JSON.stringify(myData, null, '\t');
+            init();
+        }
+    });
 }
